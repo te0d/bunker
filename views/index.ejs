@@ -12,12 +12,23 @@
   <body>
     <div class="container">
       <h1><%= title %></h1>
+      <p>You are connected to "<%= id %>".</p>
       <div class="row">
         <div class="col-md">
           <h2>Hosted Files</h2>
+          <ul>
+          <% for (var i = 0; i < pins.length; i++) {%>
+            <li><%= pins[i] %></li>
+          <% } %>
+          </ul>
         </div>
         <div class="col-md">
           <h2>Nodes</h2>
+          <ul>
+          <% for (var i = 0; i < peers.length; i++) {%>
+            <li><%= peers[i] %></li>
+          <% } %>
+          </ul>
         </div>
       </div>
     </div>
