@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
+var sassMiddleware = require('node-sass-middleware');
 // var favicon = require('serve-favicon');
 
 var index = require('./routes/index');
@@ -17,8 +18,14 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(sassMiddleware({
+  src: path.join(__dirname, 'scss'),
+  dest: path.join(__dirname, 'public'),
+  outputStyle: 'compressed',
+  prefix: '/stylesheets'
+}));
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 
 // catch 404 and forward to error handler

@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
   Promise.all(promises)
     .then((info) => {
       var id = info[0].id;
-      var pins = info[1].map((pin) => { return pin.cid });
+      var pins = info[1];
       var peers = info[2].map((peer) => { return peer.id});
 
       res.render('index', {

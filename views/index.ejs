@@ -6,27 +6,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css' integrity='sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb' crossorigin='anonymous' />
+    <link rel='stylesheet' href='/stylesheets/custom.css' />
   </head>
   <body>
     <div class="container">
-      <h1><%= title %></h1>
-      <p>You are connected to "<%= id %>".</p>
-      <div class="row">
-        <div class="col-md">
-          <h2>Hosted Files</h2>
-          <ul>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand mr-auto" href="/"><%= title %></a>
+        <span class="navbar-text"><small>Connected to</small> <%= id %></span>
+      </nav>
+      <div class="row mt-3">
+        <div id="hosted-files" class="col-md">
+          <h3 class="ml-3">Hosted Files</h3>
+          <ul class="list-group">
           <% for (var i = 0; i < pins.length; i++) {%>
-            <li><%= pins[i] %></li>
+            <li class="list-group-item">
+              <% if (pins[i].name) {%>
+                <p><%= pins[i].name %></p>
+              <% } %>
+              <p><em><%= pins[i].cid %></em></p>
+            </li>
           <% } %>
           </ul>
         </div>
-        <div class="col-md">
-          <h2>Nodes</h2>
-          <ul>
+        <div id="peer-nodes" class="col-md">
+          <h3 class="ml-3">Peer Nodes</h3>
+          <ul class="list-group">
           <% for (var i = 0; i < peers.length; i++) {%>
-            <li><%= peers[i] %></li>
+            <li class="list-group-item"><%= peers[i] %></li>
           <% } %>
           </ul>
         </div>
