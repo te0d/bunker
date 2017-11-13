@@ -64,4 +64,14 @@ router.post('/upload', upload.single('uploadFileControl'), function (req, res, n
     });
 });
 
+router.get('/unpin/:hash', function (req, res, next) {
+  var unpinHash = req.params['hash'];
+  ipfsCluster.pin.rm(unpinHash)
+    .then(() => {
+      res.redirect('/');
+    }).catch((err) => {
+      res.render('error', { error: err });
+    });
+});
+
 module.exports = router;

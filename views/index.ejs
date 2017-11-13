@@ -31,8 +31,11 @@
               <% if (pins[i].name) {%>
                 <p><%= pins[i].name %></p>
               <% } %>
-              <p><em><%= pins[i].cid %></em></p>
-              <a href="/download/<%= pins[i].cid %>?name=<%= pins[i].name %>">Download</a>
+              <p class="text-truncate"><em><%= pins[i].cid %></em></p>
+              <div class="float-right">
+                <a href="/download/<%= pins[i].cid %>?name=<%= pins[i].name %>">Download</a>
+                <a href="/unpin/<%= pins[i].cid %>?name=<%= pins[i].name %>" class="text-danger">Unpin</a>
+              </div>
             </li>
           <% } %>
           </ul>
