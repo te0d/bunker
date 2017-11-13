@@ -32,6 +32,7 @@
                 <p><%= pins[i].name %></p>
               <% } %>
               <p><em><%= pins[i].cid %></em></p>
+              <a href="/download/<%= pins[i].cid %>?name=<%= pins[i].name %>">Download</a>
             </li>
           <% } %>
           </ul>

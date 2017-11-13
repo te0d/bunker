@@ -37,6 +37,21 @@ router.get('/', function(req, res, next) {
     })
 });
 
+router.get('/download/:hash', function(req, res, next) {
+  var requestPath = '/ipfs/' + req.params['hash'];
+  var downloadName = req.query['name'];
+  ipfs.get(requestPath)
+    .then((stream) => {
+      res.setHeader('Content-disposition', 'attachment; filename=' + downloadName);
+      res.setHeader('Content-type', 'text/plain');
+      stream.on('data', (file) => {
+        file.content.pipe(res);
+      });
+    }).catch((err) => {
+      res.render('error', { error: err });
+    });
+});
+
 router.post('/upload', upload.single('uploadFileControl'), function (req, res, next) {
   ipfs.add(req.file.buffer)
     .then((ipfsRes) => {
