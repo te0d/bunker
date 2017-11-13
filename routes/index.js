@@ -1,8 +1,16 @@
 var express = require('express');
 var router = express.Router();
 
+// Handling File Uploads
+var multer = require('multer')
+var multerMemoryStorage = multer.memoryStorage();
+var upload = multer({ storage: multerMemoryStorage });
+
+// Interacting with IPFS and IPFS Cluster
+var ipfsAPI = require('ipfs-api');
 var ipfsClusterAPI = require('ipfs-cluster-api');
-var ipfsCluster = ipfsClusterAPI();                 // TODO:  allow non-default endpoints
+var ipfs = ipfsAPI();                             // TODO:  allow non-default endpoints
+var ipfsCluster = ipfsClusterAPI();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -27,6 +35,18 @@ router.get('/', function(req, res, next) {
     }).catch((err) => {
       res.render('error', { error: err });
     })
+});
+
+router.post('/upload', upload.single('uploadFileControl'), function (req, res, next) {
+  ipfs.add(req.file.buffer)
+    .then((ipfsRes) => {
+      var newHash = ipfsRes[0].hash;
+      return ipfsCluster.pin.add(newHash, { name: req.file.originalname });
+    }).then(() => {
+      res.redirect('/');
+    }).catch((err) => {
+      res.render('error', { error: err });
+    });
 });
 
 module.exports = router;
