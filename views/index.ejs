@@ -28,9 +28,14 @@
           <ul class="list-group">
           <% for (var i = 0; i < pins.length; i++) {%>
             <li class="list-group-item">
-              <% if (pins[i].name) {%>
-                <p><%= pins[i].name %></p>
-              <% } %>
+              <p>
+                <% if (pins[i].name) {%>
+                  <%= pins[i].name %>
+                <% } %>
+                <% if (pins[i].isDir) { %>
+                  <small>[DIR]</small>                     <!-- FIXME:  ugliness -->
+                <% } %>
+              </p>
               <p class="text-truncate"><em><%= pins[i].cid %></em></p>
               <div class="float-right">
                 <a href="/download/<%= pins[i].cid %>?name=<%= pins[i].name %>">Download</a>

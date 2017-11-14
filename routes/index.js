@@ -14,6 +14,8 @@ var ipfsCluster = ipfsClusterAPI();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  // Get some basic information about the connected node and its connections.
+  var connectedId, pins, peers;
   var promises = [
     ipfsCluster.id(),
     ipfsCluster.pin.ls(),
@@ -22,13 +24,26 @@ router.get('/', function(req, res, next) {
 
   Promise.all(promises)
     .then((info) => {
-      var id = info[0].id;
-      var pins = info[1];
-      var peers = info[2].map((peer) => { return peer.id});
+      connectedId = info[0].id;
+      pins = info[1];
+      peers = info[2].map((peer) => { return peer.id});
+
+      // Get more info on each of the pinned items.
+      // TODO:  Does this only work for UnixFS objects?
+      var statPromises = [];
+      for (var i = 0; i < pins.length; i++) {
+        var statReq = ipfs.object.stat(pins[i].cid);
+        statPromises.push(statReq);
+      }
+      return Promise.all(statPromises);
+    }).then((stats) => {
+      for (var i = 0; i < pins.length; i++) {
+        pins[i].isDir = stats[i].NumLinks > 0;
+      }
 
       res.render('index', {
         title: 'Bunker',
-        id: info[0].id,
+        id: connectedId,
         pins: pins,
         peers: peers
       });
