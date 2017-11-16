@@ -15,45 +15,39 @@
           <a class="navbar-brand" href="/"><%= title %></a>
           <span class="navbar-text"><small>Connected to</small> <%= id %></span>
         </div>
+        <!--  TODO:  Allow upload to current location.
         <form action="/upload" method="POST" enctype="multipart/form-data">
           <div class="form-row">
             <input class="form-control-file" type="file" id="uploadFileControl" name="uploadFileControl">
             <button type="submit" class="btn btn-primary">Upload</button>
           </div>
         </form>
+        -->
       </nav>
       <div class="row mt-3">
         <div id="hosted-files" class="col-md">
-          <h3 class="ml-3">Hosted Files</h3>
+          <h3 class="ml-3">Files at <%= target %></h3>
           <ul class="list-group">
           <% for (var i = 0; i < pins.length; i++) {%>
             <li class="list-group-item">
               <p>
-                <% if (pins[i].name) {%>
-                  <%= pins[i].name %>
+                <% if (pins[i].Name) {%>
+                  <%= pins[i].Name %>
                 <% } %>
-                <% if (pins[i].isDir) { %>
+                <% if (pins[i].Type == 1) { %>
                   <small>[DIR]</small>
                 <% } %>
               </p>
-              <p class="text-truncate"><em><%= pins[i].cid %></em></p>
+              <p class="text-truncate"><em><%= pins[i].Hash %></em></p>
               <div class="float-right">
-                <% if (pins[i].isDir) { %>
-                  <a href="/browse/<%= pins[i].cid %>" class="text-info">Browse</a>
+                <% if (pins[i].Type == 1) { %>
+                  <a href="/browse/<%= pins[i].Hash %>">Browse</a>
                 <% } else { %>
-                  <a href="/download/<%= pins[i].cid %>?name=<%= pins[i].name %>">Download</a>
+                  <a href="/download/<%= pins[i].Hash %>?name=<%= pins[i].Name %>">Download</a>
                 <% } %>
-                <a href="/unpin/<%= pins[i].cid %>?name=<%= pins[i].name %>" class="text-danger">Unpin</a>
+                <a href="/unpin/<%= pins[i].Hash %>?name=<%= pins[i].Name %>" class="text-danger">Unpin</a>
               </div>
             </li>
-          <% } %>
-          </ul>
-        </div>
-        <div id="peer-nodes" class="col-md">
-          <h3 class="ml-3">Peer Nodes</h3>
-          <ul class="list-group">
-          <% for (var i = 0; i < peers.length; i++) {%>
-            <li class="list-group-item"><%= peers[i] %></li>
           <% } %>
           </ul>
         </div>

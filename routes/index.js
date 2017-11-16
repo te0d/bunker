@@ -65,6 +65,45 @@ router.get('/', function(req, res, next) {
     })
 });
 
+router.get('/browse/*', function(req, res, next) {
+  // Get some basic information about the connected node and its connections.
+  var connectedId, pins;
+  var targetPath = req.params[0];
+  var promises = [
+    ipfsCluster.id(),
+    ipfs.ls(targetPath),
+  ];
+
+  Promise.all(promises)
+    .then((info) => {
+      connectedId = info[0].id;
+      pins = info[1].Objects[0].Links;
+
+      var sortedPins = pins.sort((a, b) => {
+        // Directories take priority, then name, then fallback to CID
+        var sortResult = 0;
+        var areSameType = a.Type == b.Type;
+        if (!areSameType) {
+          sortResult = a - b;
+        } else if (a.Name != b.Name) {
+          sortResult = a.Name > b.Name ? 1 : -1;
+        } else {
+          sortResult = a.Hash > b.Hash ? 1 : -1;  // assumes CIDs never equal
+        }
+        return sortResult;
+      });
+
+      res.render('browse', {
+        title: 'Bunker',
+        id: connectedId,
+        pins: pins,
+        target: targetPath
+      });
+    }).catch((err) => {
+      res.render('error', { error: err });
+    })
+});
+
 router.get('/download/:hash', function(req, res, next) {
   var requestPath = '/ipfs/' + req.params['hash'];
   var downloadName = req.query['name'];
