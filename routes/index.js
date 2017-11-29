@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
     .then((info) => {
       connectedId = info[0].id;
       pins = info[1];
-      peers = info[2].map((peer) => { return peer.id});
+      peers = info[2];
 
       // Get more info on each of the pinned items.
       // TODO:  Does this only work for UnixFS objects?

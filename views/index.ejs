@@ -53,7 +53,17 @@
           <h3 class="ml-3">Peer Nodes</h3>
           <ul class="list-group">
           <% for (var i = 0; i < peers.length; i++) {%>
-            <li class="list-group-item"><%= peers[i] %></li>
+            <% if (peers[i].error) { %>
+              <li class="list-group-item bg-danger text-white">
+                <p>Error:  <%= peers[i].error %></p>
+            <% } else { %>
+              <li class="list-group-item">
+            <% } %>
+              <% if (peers[i].hostname) { %>
+                <p><%= peers[i].hostname %></p>
+              <% } %>
+              <p><em><%= peers[i].id %></em></p>
+            </li>
           <% } %>
           </ul>
         </div>
