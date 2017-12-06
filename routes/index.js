@@ -15,6 +15,10 @@ var ipfsCluster = ipfsClusterAPI();
 // Consuming the UnixFS DAG representation
 var unixfs = require('ipfs-unixfs');
 
+// Helpers
+var clusterPinToIpfsPin = require('../util/clusterPinToIpfsPin');
+var sortPins = require('../util/sortPins');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   // Get some basic information about the connected node and its connections.
@@ -28,7 +32,7 @@ router.get('/', function(req, res, next) {
   Promise.all(promises)
     .then((info) => {
       connectedId = info[0].id;
-      pins = info[1];
+      pins = info[1].map((pin) => clusterPinToIpfsPin(pin));
       peers = info[2];
 
       // Get more info on each of the pinned items.
@@ -37,7 +41,7 @@ router.get('/', function(req, res, next) {
       // TODO:  Explore support for non-unixfs objects
       var statPromises = [];
       for (var i = 0; i < pins.length; i++) {
-        var statReq = ipfs.object.stat(pins[i].cid);
+        var statReq = ipfs.object.stat(pins[i].Hash);
         statPromises.push(statReq);
       }
       return Promise.all(statPromises);
@@ -46,7 +50,7 @@ router.get('/', function(req, res, next) {
       for (var i = 0; i < pins.length; i++) {
         var stat = stats[i];
         if (stat.NumLinks > 0) {
-          objectDataPromises[i] = ipfs.object.data(pins[i].cid)
+          objectDataPromises[i] = ipfs.object.data(pins[i].Hash)
         } else {
           pins[i].isDir = false;
         }
@@ -59,20 +63,7 @@ router.get('/', function(req, res, next) {
         var ufsObject = unixfs.unmarshal(data[i]);
         pins[pinIndex].isDir = ufsObject.type == 'directory' || ufsObject.type == 'symlink';
       }
-
-      var sortedPins = pins.sort((a, b) => {
-        // Directories take priority, then name, then fallback to CID
-        var sortResult = 0;
-        var areSameType = a.isDir == b.isDir;
-        if (!areSameType) {
-          sortResult = a.isDir ? -1 : 1;
-        } else if (a.name != b.name) {
-          sortResult = a.name > b.name ? 1 : -1;
-        } else {
-          sortResult = a.cid > b.cid ? 1 : -1;  // assumes CIDs never equal
-        }
-        return sortResult;
-      });
+      var sortedPins = sortPins(pins);
 
       res.render('index', {
         title: 'Bunker',
@@ -98,20 +89,10 @@ router.get('/browse/*', function(req, res, next) {
     .then((info) => {
       connectedId = info[0].id;
       pins = info[1].Objects[0].Links;
-
-      var sortedPins = pins.sort((a, b) => {
-        // Directories take priority, then name, then fallback to CID
-        var sortResult = 0;
-        var areSameType = a.Type == b.Type;
-        if (!areSameType) {
-          sortResult = a - b;
-        } else if (a.Name != b.Name) {
-          sortResult = a.Name > b.Name ? 1 : -1;
-        } else {
-          sortResult = a.Hash > b.Hash ? 1 : -1;  // assumes CIDs never equal
-        }
-        return sortResult;
-      });
+      for (var i = 0; i < pins.length; i++) {
+        pins[i].isDir = pins[i].Type == 1;
+      }
+      var sortedPins = sortPins(pins);
 
       res.render('browse', {
         title: 'Bunker',
