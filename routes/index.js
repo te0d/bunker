@@ -12,10 +12,13 @@ var ipfsClusterAPI = require('ipfs-cluster-api');
 var ipfs = ipfsAPI();                             // TODO:  allow non-default endpoints
 var ipfsCluster = ipfsClusterAPI();
 
+// Consuming the UnixFS DAG representation
+var unixfs = require('ipfs-unixfs');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   // Get some basic information about the connected node and its connections.
-  var connectedId, pins, peers;
+  var connectedId, pins, peers, objectDataPromises;
   var promises = [
     ipfsCluster.id(),
     ipfsCluster.pin.ls(),
@@ -29,7 +32,9 @@ router.get('/', function(req, res, next) {
       peers = info[2];
 
       // Get more info on each of the pinned items.
-      // TODO:  Does this only work for UnixFS objects?
+      // We assume objects with no links are files. Objects with links need to
+      // be looked up and unmarshaled by unixfs to discover type.
+      // TODO:  Explore support for non-unixfs objects
       var statPromises = [];
       for (var i = 0; i < pins.length; i++) {
         var statReq = ipfs.object.stat(pins[i].cid);
@@ -37,9 +42,24 @@ router.get('/', function(req, res, next) {
       }
       return Promise.all(statPromises);
     }).then((stats) => {
+      objectDataPromises = {};
       for (var i = 0; i < pins.length; i++) {
-        pins[i].isDir = stats[i].NumLinks > 0;
+        var stat = stats[i];
+        if (stat.NumLinks > 0) {
+          objectDataPromises[i] = ipfs.object.data(pins[i].cid)
+        } else {
+          pins[i].isDir = false;
+        }
       }
+      return Promise.all(Object.values(objectDataPromises));
+    }).then((data) => {
+      var objectDataIndices = Object.keys(objectDataPromises);
+      for (var i = 0; i < objectDataIndices.length; i++) {
+        var pinIndex = objectDataIndices[i];
+        var ufsObject = unixfs.unmarshal(data[i]);
+        pins[pinIndex].isDir = ufsObject.type == 'directory' || ufsObject.type == 'symlink';
+      }
+
       var sortedPins = pins.sort((a, b) => {
         // Directories take priority, then name, then fallback to CID
         var sortResult = 0;
